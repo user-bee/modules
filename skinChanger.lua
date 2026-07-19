@@ -50,7 +50,10 @@ function skinChanger:launch()
     listContainer.BorderSizePixel = 1
     listContainer.ScrollBarThickness = 5
     listContainer.Visible = false
-    Instance.new("UIListLayout", listContainer)
+    
+    -- Added 1px padding between all items in the dropdown
+    local layout = Instance.new("UIListLayout", listContainer)
+    layout.Padding = UDim.new(0, 1)
     
     local dropDownOpen = false
 
@@ -62,7 +65,7 @@ function skinChanger:launch()
 
         local count = 0
 
-        -- Add "Back" button if we are not at the root Knives folder
+        -- Add "Back" button
         if directory ~= knives then
             local btnBack = createButton("< Back", listContainer, UDim2.new(1, 0, 0, 25), UDim2.new(0, 0, 0, 0))
             btnBack.MouseButton1Click:Connect(function()
@@ -71,31 +74,29 @@ function skinChanger:launch()
             count = count + 1
         end
 
-        -- Populate items
+        -- Populate everything in the folder
         for _, item in pairs(directory:GetChildren()) do
-            -- Only include Folders or Models
-            if item:IsA("Folder") or item:IsA("Model") then
-                count = count + 1
-                
-                -- Create button text: "Name: ClassName"
-                local displayText = item.Name .. ": " .. item.ClassName
-                local btn = createButton(displayText, listContainer, UDim2.new(1, 0, 0, 25), UDim2.new(0, 0, 0, 0))
-                
-                btn.MouseButton1Click:Connect(function()
-                    if item:IsA("Folder") then
-                        -- Drill down into the folder
-                        updateList(item)
-                    elseif item:IsA("Model") then
-                        -- Select the model
-                        self:changeSkin(item.Name)
-                        btnSelect.Text = item.Name
-                        dropDownOpen = false
-                        listContainer.Visible = false
-                    end
-                end)
-            end
+            count = count + 1
+            
+            -- Show Name: ClassName
+            local displayText = item.Name .. ": " .. item.ClassName
+            local btn = createButton(displayText, listContainer, UDim2.new(1, 0, 0, 25), UDim2.new(0, 0, 0, 0))
+            
+            btn.MouseButton1Click:Connect(function()
+                if item:IsA("Folder") then
+                    updateList(item)
+                else
+                    -- For Models or any other item, run the change skin logic
+                    self:changeSkin(item.Name)
+                    btnSelect.Text = item.Name
+                    dropDownOpen = false
+                    listContainer.Visible = false
+                end
+            end)
         end
-        listContainer.CanvasSize = UDim2.new(0, 0, 0, count * 25)
+        
+        -- Adjust CanvasSize to account for 25px height + 1px padding for each item
+        listContainer.CanvasSize = UDim2.new(0, 0, 0, count * 26)
     end
 
     btnSelect.MouseButton1Click:Connect(function()
