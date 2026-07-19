@@ -52,7 +52,6 @@ function skinChanger:launch()
     listContainer.Visible = false
     Instance.new("UIListLayout", listContainer)
     
-    local currentDirectory = knives
     local dropDownOpen = false
 
     local function updateList(directory)
@@ -61,10 +60,9 @@ function skinChanger:launch()
             if not child:IsA("UIListLayout") then child:Destroy() end
         end
 
-        currentDirectory = directory
         local count = 0
 
-        -- Add "Back" button if not at the root
+        -- Add "Back" button if we are not at the root Knives folder
         if directory ~= knives then
             local btnBack = createButton("< Back", listContainer, UDim2.new(1, 0, 0, 25), UDim2.new(0, 0, 0, 0))
             btnBack.MouseButton1Click:Connect(function()
@@ -75,14 +73,20 @@ function skinChanger:launch()
 
         -- Populate items
         for _, item in pairs(directory:GetChildren()) do
+            -- Only include Folders or Models
             if item:IsA("Folder") or item:IsA("Model") then
                 count = count + 1
-                local btn = createButton(item.Name .. (item:IsA("Folder") and " >" or ""), listContainer, UDim2.new(1, 0, 0, 25), UDim2.new(0, 0, 0, 0))
+                
+                -- Create button text: "Name: ClassName"
+                local displayText = item.Name .. ": " .. item.ClassName
+                local btn = createButton(displayText, listContainer, UDim2.new(1, 0, 0, 25), UDim2.new(0, 0, 0, 0))
                 
                 btn.MouseButton1Click:Connect(function()
                     if item:IsA("Folder") then
+                        -- Drill down into the folder
                         updateList(item)
-                    else
+                    elseif item:IsA("Model") then
+                        -- Select the model
                         self:changeSkin(item.Name)
                         btnSelect.Text = item.Name
                         dropDownOpen = false
