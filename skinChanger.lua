@@ -89,6 +89,8 @@ function skinChanger:changeSkin()
     local skinValue = self.txtSetSkin.Text
     if (knives:FindFirstChild(skinValue)) then
         print(knives:FindFirstChild(skinValue))
+    else
+        print("knife not found")
     end
 end
 
