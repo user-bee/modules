@@ -50,38 +50,55 @@ function skinChanger:launch()
     listContainer.BorderSizePixel = 1
     listContainer.ScrollBarThickness = 5
     listContainer.Visible = false
+    Instance.new("UIListLayout", listContainer)
     
+    local currentDirectory = knives
     local dropDownOpen = false
-    
+
+    local function updateList(directory)
+        -- Clear existing items
+        for _, child in pairs(listContainer:GetChildren()) do
+            if not child:IsA("UIListLayout") then child:Destroy() end
+        end
+
+        currentDirectory = directory
+        local count = 0
+
+        -- Add "Back" button if not at the root
+        if directory ~= knives then
+            local btnBack = createButton("< Back", listContainer, UDim2.new(1, 0, 0, 25), UDim2.new(0, 0, 0, 0))
+            btnBack.MouseButton1Click:Connect(function()
+                updateList(directory.Parent)
+            end)
+            count = count + 1
+        end
+
+        -- Populate items
+        for _, item in pairs(directory:GetChildren()) do
+            if item:IsA("Folder") or item:IsA("Model") then
+                count = count + 1
+                local btn = createButton(item.Name .. (item:IsA("Folder") and " >" or ""), listContainer, UDim2.new(1, 0, 0, 25), UDim2.new(0, 0, 0, 0))
+                
+                btn.MouseButton1Click:Connect(function()
+                    if item:IsA("Folder") then
+                        updateList(item)
+                    else
+                        self:changeSkin(item.Name)
+                        btnSelect.Text = item.Name
+                        dropDownOpen = false
+                        listContainer.Visible = false
+                    end
+                end)
+            end
+        end
+        listContainer.CanvasSize = UDim2.new(0, 0, 0, count * 25)
+    end
+
     btnSelect.MouseButton1Click:Connect(function()
         dropDownOpen = not dropDownOpen
         listContainer.Visible = dropDownOpen
-        
         if dropDownOpen then
-            for _, child in pairs(listContainer:GetChildren()) do
-                if not child:IsA("UIListLayout") then child:Destroy() end
-            end
-            
-            if not listContainer:FindFirstChild("UIListLayout") then
-                Instance.new("UIListLayout", listContainer)
-            end
-            
-            local count = 0
-            for _, descendant in pairs(knives:GetDescendants()) do
-                    count = count + 1
-                    print("Found: " .. descendant.Name)
-                    
-                    local item = createButton(descendant.Name, listContainer, UDim2.new(1, 0, 0, 25), UDim2.new(0, 0, 0, 0))
-                    
-                    item.MouseButton1Click:Connect(function()
-                        self:changeSkin(descendant.Name)
-                        btnSelect.Text = descendant.Name
-                        dropDownOpen = false
-                        listContainer.Visible = false
-                    end)
-            end
-            
-            listContainer.CanvasSize = UDim2.new(0, 0, 0, count * 25)
+            updateList(knives)
         end
     end)
 end
