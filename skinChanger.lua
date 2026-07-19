@@ -2,13 +2,10 @@ local players = game:GetService("Players")
 local rs = game:GetService("RunService")
 local replicatedStorage = game:GetService("ReplicatedStorage")
 local uis = game:GetService("UserInputService")
-local httpService = game:GetService("HttpService")
-local camera = workspace.CurrentCamera
-local player = players.LocalPlayer
 local coreGui = game:GetService("CoreGui")
-local mouse = player:GetMouse()
+local player = players.LocalPlayer
 
-local knives = replicatedStorage.Assets.SkinAssets.ClassicCase.Knives
+local knives = replicatedStorage:WaitForChild("Assets"):WaitForChild("SkinAssets"):WaitForChild("ClassicCase"):WaitForChild("Knives")
 
 local function createButton(name, parent, size, pos)
     local btn = Instance.new("TextButton", parent)
@@ -21,22 +18,6 @@ local function createButton(name, parent, size, pos)
     btn.Font = Enum.Font.Code
     btn.TextSize = 14
     return btn
-end
-
-local function createTextBox(placeholder, parent, size, pos)
-    local box = Instance.new("TextBox", parent)
-    box.Size = size
-    box.Position = pos
-    box.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    box.BorderColor3 = Color3.fromRGB(255, 255, 255)
-    box.TextColor3 = Color3.fromRGB(255, 255, 255)
-    box.PlaceholderText = placeholder
-    box.PlaceholderColor3 = Color3.fromRGB(170, 170, 170)
-    box.Text = ""
-    box.Font = Enum.Font.Code
-    box.TextSize = 14
-    box.ClearTextOnFocus = false
-    return box
 end
 
 local skinChanger = {}
@@ -56,6 +37,7 @@ function skinChanger:launch()
     mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     mainFrame.BorderSizePixel = 1
     mainFrame.BorderColor3 = Color3.fromRGB(255, 255, 255)
+    mainFrame.ClipsDescendants = false
     
     local dragging, dragStart, startPos
     mainFrame.InputBegan:Connect(function(input)
@@ -77,33 +59,46 @@ function skinChanger:launch()
         if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
     end)
 
-    self.txtSetSkin = createTextBox("Target Skin", mainFrame, UDim2.new(0, 390, 0, 20), UDim2.new(0, 5, 0, 5))
+    local dropDownOpen = false
+    local btnSelect = createButton("Select Knife", mainFrame, UDim2.new(0, 390, 0, 20), UDim2.new(0, 5, 0, 5))
     
-    local btnChange = createButton("Apply Skin", mainFrame, UDim2.new(0, 390, 0, 20), UDim2.new(0, 5, 0, 31))
-    btnChange.MouseButton1Click:Connect(function()
-        self:changeSkin()
+    local listContainer = Instance.new("ScrollingFrame", mainFrame)
+    listContainer.Size = UDim2.new(0, 390, 0, 200)
+    listContainer.Position = UDim2.new(0, 5, 0, 26)
+    listContainer.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    listContainer.Visible = false
+    listContainer.ScrollBarThickness = 5
+
+    local layout = Instance.new("UIListLayout", listContainer)
+
+    btnSelect.MouseButton1Click:Connect(function()
+        dropDownOpen = not dropDownOpen
+        listContainer.Visible = dropDownOpen
+        
+        if dropDownOpen then
+            listContainer:ClearAllChildren()
+            Instance.new("UIListLayout", listContainer)
+            
+            for _, child in pairs(knives:GetDescendants()) do
+                if child:IsA("Model") then
+                    local item = createButton(child.Name, listContainer, UDim2.new(1, 0, 0, 25), UDim2.new(0, 0, 0, 0))
+                    item.MouseButton1Click:Connect(function()
+                        self:changeSkin(child.Name)
+                        dropDownOpen = false
+                        listContainer.Visible = false
+                    end)
+                end
+            end
+            
+            local totalHeight = #listContainer:GetChildren() * 25
+            listContainer.CanvasSize = UDim2.new(0, 0, 0, totalHeight)
+        end
     end)
 end
 
-function skinChanger:changeSkin()
-    local skinValue = self.txtSetSkin.Text
+function skinChanger:changeSkin(knifeName)
+    print("Applying skin: " .. knifeName)
     
-    local foundItem = nil
-    
-    for _, descendant in pairs(knives:GetDescendants()) do
-        local relativePath = string.gsub(descendant:GetFullName(), knives:GetFullName() .. ".", "")
-        
-        if string.lower(relativePath) == string.lower(skinValue) then
-            foundItem = descendant
-            break
-        end
-    end
-    
-    if foundItem then
-        print("Success! Found: " .. foundItem:GetFullName())
-    else
-        print("Item not found. Please ensure the path is correct.")
-    end
 end
 
 return skinChanger
