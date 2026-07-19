@@ -5,7 +5,7 @@ local uis = game:GetService("UserInputService")
 local coreGui = game:GetService("CoreGui")
 local player = players.LocalPlayer
 
-local knives = replicatedStorage:WaitForChild("Assets"):WaitForChild("SkinAssets"):WaitForChild("ClassicCase"):WaitForChild("Knives")
+local knives = replicatedStorage:WaitForChild("Assets"):WaitForChild("SkinAssets"):WaitForChild("Case3"):WaitForChild("Knives")
 
 local function createButton(name, parent, size, pos)
     local btn = Instance.new("TextButton")
@@ -58,21 +58,19 @@ function skinChanger:launch()
         listContainer.Visible = dropDownOpen
         
         if dropDownOpen then
-            -- Clean out old stuff
             for _, child in pairs(listContainer:GetChildren()) do
                 if not child:IsA("UIListLayout") then child:Destroy() end
             end
             
-            -- Ensure Layout exists
             if not listContainer:FindFirstChild("UIListLayout") then
                 Instance.new("UIListLayout", listContainer)
             end
             
             local count = 0
             for _, descendant in pairs(knives:GetDescendants()) do
-                if descendant:IsA("Model") then
+                if descendant:IsA("Folder") then
                     count = count + 1
-                    print("Found Model: " .. descendant.Name) -- Check Output for this!
+                    print("Found Folder: " .. descendant.Name)
                     
                     local item = createButton(descendant.Name, listContainer, UDim2.new(1, 0, 0, 25), UDim2.new(0, 0, 0, 0))
                     
