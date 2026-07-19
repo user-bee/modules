@@ -88,21 +88,21 @@ end
 function skinChanger:changeSkin()
     local skinValue = self.txtSetSkin.Text
     
-    print("Searching for: '" .. skinValue .. "'")
+    local foundItem = nil
     
-    local foundKnife = nil
-    
-    for _, knife in pairs(knives:GetChildren()) do
-        if string.lower(knife.Name) == string.lower(skinValue) then
-            foundKnife = knife
+    for _, descendant in pairs(knives:GetDescendants()) do
+        local relativePath = string.gsub(descendant:GetFullName(), knives:GetFullName() .. ".", "")
+        
+        if string.lower(relativePath) == string.lower(skinValue) then
+            foundItem = descendant
             break
         end
     end
     
-    if foundKnife then
-        print("Success! Found: " .. foundKnife.Name)
+    if foundItem then
+        print("Success! Found: " .. foundItem:GetFullName())
     else
-        print("Knife not found. Check your spelling.")
+        print("Item not found. Please ensure the path is correct.")
     end
 end
 
