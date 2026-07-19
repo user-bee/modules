@@ -68,9 +68,8 @@ function skinChanger:launch()
             
             local count = 0
             for _, descendant in pairs(knives:GetDescendants()) do
-                if descendant:IsA("Folder") then
                     count = count + 1
-                    print("Found Folder: " .. descendant.Name)
+                    print("Found: " .. descendant.Name)
                     
                     local item = createButton(descendant.Name, listContainer, UDim2.new(1, 0, 0, 25), UDim2.new(0, 0, 0, 0))
                     
@@ -80,7 +79,6 @@ function skinChanger:launch()
                         dropDownOpen = false
                         listContainer.Visible = false
                     end)
-                end
             end
             
             listContainer.CanvasSize = UDim2.new(0, 0, 0, count * 25)
