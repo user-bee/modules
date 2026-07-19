@@ -5,12 +5,14 @@ local uis = game:GetService("UserInputService")
 local coreGui = game:GetService("CoreGui")
 local player = players.LocalPlayer
 
+-- Updated path to target the folder
 local knives = replicatedStorage:WaitForChild("Assets"):WaitForChild("SkinAssets"):WaitForChild("ClassicCase"):WaitForChild("Knives")
 
 local function createButton(name, parent, size, pos)
     local btn = Instance.new("TextButton", parent)
     btn.Size = size
     btn.Position = pos
+    -- Matching your exact requested style
     btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     btn.BorderColor3 = Color3.fromRGB(255, 255, 255)
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -37,8 +39,8 @@ function skinChanger:launch()
     mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     mainFrame.BorderSizePixel = 1
     mainFrame.BorderColor3 = Color3.fromRGB(255, 255, 255)
-    mainFrame.ClipsDescendants = false
     
+    -- Dragging Logic
     local dragging, dragStart, startPos
     mainFrame.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -59,17 +61,21 @@ function skinChanger:launch()
         if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
     end)
 
+    -- Dropdown Setup
     local dropDownOpen = false
     local btnSelect = createButton("Select Knife", mainFrame, UDim2.new(0, 390, 0, 20), UDim2.new(0, 5, 0, 5))
     
     local listContainer = Instance.new("ScrollingFrame", mainFrame)
     listContainer.Size = UDim2.new(0, 390, 0, 200)
-    listContainer.Position = UDim2.new(0, 5, 0, 26)
-    listContainer.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    listContainer.Visible = false
+    listContainer.Position = UDim2.new(0, 5, 0, 30)
+    listContainer.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    listContainer.BorderColor3 = Color3.fromRGB(255, 255, 255)
     listContainer.ScrollBarThickness = 5
-
+    listContainer.Visible = false
+    listContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
+    
     local layout = Instance.new("UIListLayout", listContainer)
+    layout.Padding = UDim.new(0, 2)
 
     btnSelect.MouseButton1Click:Connect(function()
         dropDownOpen = not dropDownOpen
@@ -79,26 +85,27 @@ function skinChanger:launch()
             listContainer:ClearAllChildren()
             Instance.new("UIListLayout", listContainer)
             
-            for _, child in pairs(knives:GetDescendants()) do
+            local count = 0
+            for _, child in pairs(knives:GetChildren()) do
                 if child:IsA("Model") then
-                    local item = createButton(child.Name, listContainer, UDim2.new(1, 0, 0, 25), UDim2.new(0, 0, 0, 0))
+                    count = count + 1
+                    local item = createButton(child.Name, listContainer, UDim2.new(1, -10, 0, 25), UDim2.new(0, 5, 0, 0))
                     item.MouseButton1Click:Connect(function()
                         self:changeSkin(child.Name)
+                        btnSelect.Text = child.Name
                         dropDownOpen = false
                         listContainer.Visible = false
                     end)
                 end
             end
-            
-            local totalHeight = #listContainer:GetChildren() * 25
-            listContainer.CanvasSize = UDim2.new(0, 0, 0, totalHeight)
+            -- Dynamically set scroll area height
+            listContainer.CanvasSize = UDim2.new(0, 0, 0, count * 27)
         end
     end)
 end
 
 function skinChanger:changeSkin(knifeName)
     print("Applying skin: " .. knifeName)
-    
 end
 
 return skinChanger
