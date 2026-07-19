@@ -87,10 +87,22 @@ end
 
 function skinChanger:changeSkin()
     local skinValue = self.txtSetSkin.Text
-    if (knives:FindFirstChild(skinValue)) then
-        print(knives:FindFirstChild(skinValue))
+    
+    print("Searching for: '" .. skinValue .. "'")
+    
+    local foundKnife = nil
+    
+    for _, knife in pairs(knives:GetChildren()) do
+        if string.lower(knife.Name) == string.lower(skinValue) then
+            foundKnife = knife
+            break
+        end
+    end
+    
+    if foundKnife then
+        print("Success! Found: " .. foundKnife.Name)
     else
-        print("knife not found")
+        print("Knife not found. Check your spelling.")
     end
 end
 
