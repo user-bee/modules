@@ -1,11 +1,14 @@
 local players = game:GetService("Players")
 local rs = game:GetService("RunService")
+local replicatedStorage = game:GetService("ReplicatedStorage")
 local uis = game:GetService("UserInputService")
 local httpService = game:GetService("HttpService")
 local camera = workspace.CurrentCamera
 local player = players.LocalPlayer
 local coreGui = game:GetService("CoreGui")
 local mouse = player:GetMouse()
+
+local knives = replicatedStorage.Assets.SkinAssets.ClassicCase.Knives
 
 local function createButton(name, parent, size, pos)
     local btn = Instance.new("TextButton", parent)
@@ -74,9 +77,9 @@ function skinChanger:launch()
         if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
     end)
 
-    self.txtSetSkin = createTextBox("Target Skin", mainFrame, UDim2.new(0, 390, 0, 20), UDim2.new(0, 5, 0, 31))
+    self.txtSetSkin = createTextBox("Target Skin", mainFrame, UDim2.new(0, 390, 0, 20), UDim2.new(0, 5, 0, 5))
     
-    local btnChange = createButton("Apply Skin", mainFrame, UDim2.new(0, 390, 0, 20), UDim2.new(0, 5, 0, 57))
+    local btnChange = createButton("Apply Skin", mainFrame, UDim2.new(0, 390, 0, 20), UDim2.new(0, 5, 0, 31))
     btnChange.MouseButton1Click:Connect(function()
         self:changeSkin()
     end)
@@ -84,8 +87,9 @@ end
 
 function skinChanger:changeSkin()
     local skinValue = self.txtSetSkin.Text
-
-    
+    if (knives:FindFirstChild(skinValue)) then
+        print(knives:FindFirstChild(skinValue))
+    end
 end
 
 return skinChanger
