@@ -2045,8 +2045,8 @@ do
             displayLabel.Text = string.format('%s/%s', slider.value .. suffix, slider.max .. suffix);
         end
 
-        local maxSize = sliderInner.AbsoluteSize.X;
-        -- Use math.clamp to ensure floating point inaccuracies don't cause math.ceil to add an extra pixel
+        -- Account for the 1 pixel border width by subtracting 1
+        local maxSize = sliderInner.AbsoluteSize.X - 1;
         local x = math.clamp(math.ceil(library:mapValue(slider.value, slider.min, slider.max, 0, maxSize)), 0, maxSize);
         fill.Size = UDim2.new(0, x, 1, 0);
 
@@ -2067,7 +2067,8 @@ do
     end;
 
     function slider:getValueFromXOffset(x)
-        local maxSize = sliderInner.AbsoluteSize.X;
+        -- Account for the 1 pixel border width by subtracting 1
+        local maxSize = sliderInner.AbsoluteSize.X - 1;
         return round(library:mapValue(x, 0, maxSize, slider.min, slider.max));
     end;
 
@@ -2095,7 +2096,8 @@ do
 
             while inputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) do
                 local nMPos = mouse.X;
-                local maxSize = sliderInner.AbsoluteSize.X;
+                -- Account for the 1 pixel border width by subtracting 1
+                local maxSize = sliderInner.AbsoluteSize.X - 1;
                 local nX = math.clamp(gPos + (nMPos - mPos) + diff, 0, maxSize);
 
                 local nValue = slider:getValueFromXOffset(nX);
