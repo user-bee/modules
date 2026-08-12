@@ -2047,6 +2047,12 @@ do
 
             local maxSize = sliderInner.AbsoluteSize.X;
             local x = math.ceil(library:mapValue(slider.value, slider.min, slider.max, 0, maxSize));
+            
+            -- Prevent the fill from overflowing past the inner container bounds
+            if slider.value >= slider.max then
+                x = maxSize;
+            end
+
             fill.Size = UDim2.new(0, x, 1, 0);
 
             hideBorderRight.Visible = not (x >= maxSize or x == 0);
