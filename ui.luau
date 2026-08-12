@@ -1926,7 +1926,7 @@ do
 
         return toggle;
     end;
-
+    
     function funcs:addSlider(idx, info)
     assert(info.Default, 'addSlider: Missing default value.');
     assert(info.Text, 'addSlider: Missing slider text.');
@@ -2045,9 +2045,15 @@ do
             displayLabel.Text = string.format('%s/%s', slider.value .. suffix, slider.max .. suffix);
         end
 
-        -- Account for the 1 pixel border width by subtracting 1
-        local maxSize = sliderInner.AbsoluteSize.X - 1;
-        local x = math.clamp(math.ceil(library:mapValue(slider.value, slider.min, slider.max, 0, maxSize)), 0, maxSize);
+        -- Subtract exactly 2 pixels to account for the left & right Outline borders on the fill frame
+        local maxSize = math.max(0, sliderInner.AbsoluteSize.X - 2);
+        
+        local x = 0
+        if maxSize > 0 then
+            -- Use math.floor(val + 0.5) to reliably snap to the nearest exact pixel 
+            x = math.clamp(math.floor(library:mapValue(slider.value, slider.min, slider.max, 0, maxSize) + 0.5), 0, maxSize);
+        end
+        
         fill.Size = UDim2.new(0, x, 1, 0);
 
         hideBorderRight.Visible = not (x >= maxSize or x == 0);
@@ -2067,8 +2073,8 @@ do
     end;
 
     function slider:getValueFromXOffset(x)
-        -- Account for the 1 pixel border width by subtracting 1
-        local maxSize = sliderInner.AbsoluteSize.X - 1;
+        local maxSize = math.max(0, sliderInner.AbsoluteSize.X - 2);
+        if maxSize == 0 then return slider.min end
         return round(library:mapValue(x, 0, maxSize, slider.min, slider.max));
     end;
 
@@ -2090,15 +2096,11 @@ do
 
     sliderInner.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 and not library:mouseIsOverOpenedFrame() then
-            local mPos = mouse.X;
-            local gPos = fill.Size.X.Offset;
-            local diff = mPos - (fill.AbsolutePosition.X + gPos);
-
             while inputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) do
-                local nMPos = mouse.X;
-                -- Account for the 1 pixel border width by subtracting 1
-                local maxSize = sliderInner.AbsoluteSize.X - 1;
-                local nX = math.clamp(gPos + (nMPos - mPos) + diff, 0, maxSize);
+                local maxSize = math.max(0, sliderInner.AbsoluteSize.X - 2);
+                
+                -- The math is much simpler: just find exactly where the mouse is relative to the start of the fill bar
+                local nX = math.clamp(mouse.X - fill.AbsolutePosition.X, 0, maxSize);
 
                 local nValue = slider:getValueFromXOffset(nX);
                 local oldValue = slider.value;
@@ -2126,6 +2128,7 @@ do
 
     return slider;
 end;
+    
     function funcs:addDropdown(idx, info)
         if info.SpecialType == 'Player' then
             info.Values = getPlayersString();
